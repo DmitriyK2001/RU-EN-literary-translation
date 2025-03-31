@@ -19,19 +19,6 @@ model.train()
 save_path = "./qwen_lora_finetuned_one"
 dataset = load_dataset("./datasets")
 
-
-
-#def preprocess_function(examples):
-#    inputs = ["Translate the following text: " + text for text in examples["source"]]
-#    targets = examples["target"]
-#    
-#    model_inputs = tokenizer(inputs, max_length=20000, truncation=True, padding="max_length")
-#
-#    with tokenizer.as_target_tokenizer():
-#        labels = tokenizer(targets, max_length=20000, truncation=True, padding="max_length")
-#    model_inputs["labels"] = labels["input_ids"]
-#    return model_inputs
-
 def preprocess_long_text(examples):
     inputs = []
     labels = []
@@ -71,29 +58,12 @@ def compute_metrics_bleu(eval_pred):
     result = bleu_metric.compute(predictions=decoded_preds, references=decoded_labels, use_stemmer=True)
     return result
 
-def compute_metrics_rouge(eval_preds):
-    preds, labels = eval_preds
-
-    # decode preds and labels
-    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
-    decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True)
-    decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
-
-    # rougeLSum expects newline after each sentence
-    decoded_preds = ["\n".join(nltk.sent_tokenize(pred.strip())) for pred in decoded_preds]
-    decoded_labels = ["\n".join(nltk.sent_tokenize(label.strip())) for label in decoded_labels]
-
-    #result = metric.compute(predictions=decoded_preds, references=decoded_labels, use_stemmer=True)
-    #return result
-
-
 full_train = True
 tokenized_datasets = dataset.map(preprocess_long_text, batched=True, remove_columns=dataset["train"].column_names)
 if not full_train:
     small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(30))
     tokenized_datasets["train"] = small_train_dataset
 
-#tokenized_datasets["test"] = tokenized_datasets["train"].shuffle(seed=42).select(range(1))
 
 lora_config = LoraConfig(
     r=24,
