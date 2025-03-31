@@ -1,0 +1,10 @@
+*.json
+*.txt
+
+bitsandbytes/
+# Игнорировать папку с логами
+qwen_lora_finetuned/
+qwen_lora_finetuned_gpu/
+qwen_lora_finetuned_gpu_2/
+qwen_lora_finetuned_one/
+qwen_lora_finetuned_two/
